@@ -70,6 +70,24 @@ void showSplash() {
     tft.pushImage(0, 0, 135, 240, bootlogo);
 }
 
+void displayBoard() {
+    tft.fillScreen(TFT_BLACK);
+    tft.drawLine(0, 17, 0, 240, TFT_GREY);
+    tft.drawLine(0, 17, 135, 17, TFT_GREY);
+    tft.drawLine(134, 17, 134, 240, TFT_GREY);
+
+    tft.setCursor(3, 3, 2);
+
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.setTextSize(1);
+
+    tft.setCursor(0, 0, 2);
+    tft.println("SCORE " + String(score));
+
+    tft.setCursor(99, 0, 2);
+    tft.println("LVL" + String(level));
+}
+
 void suspend() {
     suspendCount = 0;
     showSplash();
@@ -120,25 +138,10 @@ void loop() {
     if (fase == 0) {
         if (digitalRead(0) == 0 || digitalRead(35) == 0) {
             if (pom == 0) {
-                tft.fillScreen(TFT_BLACK);
-                tft.drawLine(0, 17, 0, 240, TFT_GREY);
-                tft.drawLine(0, 17, 135, 17, TFT_GREY);
-                tft.drawLine(134, 17, 134, 240, TFT_GREY);
-
-                tft.setCursor(3, 3, 2);
-
-                tft.setTextColor(TFT_WHITE, TFT_BLACK);
-                tft.setTextSize(1);
-
-                tft.setCursor(0, 0, 2);
-                tft.println("SCORE " + String(score));
-
-                tft.setCursor(99, 0, 2);
-                tft.println("LVL" + String(level));
+                displayBoard();
                 fase = fase + 1;
                 pom = 1;
             }
-
         } else {
             pom = 0;
         }
