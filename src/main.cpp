@@ -1,20 +1,20 @@
 
-//240x135
 #include <SPI.h>
 #include <TFT_eSPI.h>       // Hardware-specific library
-TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
 #include "bmp.h"
+
 #define TFT_GREY 0x5AEB
 #define lightblue 0x2D18
 #define orange 0xFB60
 #define purple 0xFB9B
-float ys = 1;
 
+TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
+
+float ys = 1;
 float x = random(30, 100);  //coordinates of ball
 float y = 70;
 int ny = y;  //coordinates of previous position
 int nx = x;
-
 float px = 45;  //67 je sredina    pozicija igrača
 int pxn = px;
 int vrije[2] = {1, -1};
@@ -26,7 +26,6 @@ int level = 1;
 float amount[4] = {0.25, 0.50, 0.75, 1};
 float xs = amount[random(4)] * vrije[random(2)];
 int fase = 0;
-
 float xstep = 1;
 int spe = 0;
 int pom = 0;
