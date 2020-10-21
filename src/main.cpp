@@ -1,7 +1,7 @@
 
 #include <SPI.h>
 #include <TFT_eSPI.h>  // Hardware-specific library
-
+#include <Preferences.h>
 #include "bmp.h"
 
 #define TFT_GREY 0x5AEB
@@ -33,6 +33,9 @@ int pom = 0;
 int gameSpeed = 7000;
 
 uint32_t suspendCount = 0;
+
+Preferences preferences;
+const char * app_name = "breakout";
 
 void resetVars() {
     tft.setCursor(99, 0, 2);
@@ -82,6 +85,27 @@ void suspend() {
     esp_sleep_enable_ext0_wakeup(GPIO_NUM_35, 0);
     delay(200);
     esp_deep_sleep_start();
+}
+
+void saveRecord(int level, int score) {
+    preferences.begin(app_name,false);
+    preferences.putInt("level_record",level);
+    preferences.putInt("score_record",score);
+    preferences.end();
+}
+
+int getLevelRecord() {
+    preferences.begin(app_name, false);
+    int record = preferences.getInt("level_record",0);
+    preferences.end();
+    return record;
+}
+
+int getScoreRecord() {
+    preferences.begin(app_name, false);
+    int record = preferences.getInt("score_record",0);
+    preferences.end();
+    return record;
 }
 
 void setup(void) {
@@ -193,27 +217,48 @@ void loop() {
         if (score == 16 || score == 33 || score == 50 || score == 67 || score == 84 || score == 101 || score == 118 || score == 135 || score == 152 || score == 169)
             newLevel();
 
+        suspendCount = 0;
         delayMicroseconds(gameSpeed);
     }
     if (fase == 2) {
         tft.fillScreen(TFT_BLACK);
 
-        tft.setCursor(13, 103, 2);
-
+        tft.setCursor(13, 83, 2);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setTextSize(1);
 
         tft.println("GAME OVER");
-        tft.setCursor(13, 123, 4);
+
+        tft.setCursor(13, 103, 4);
         tft.println("SCORE:" + String(score));
 
-        tft.setCursor(13, 153, 4);
-        tft.println("LEVEL:" + String(level));
+        tft.setCursor(13, 130, 4);
+        tft.println("LEVEL:"+ String(level));
 
-        tft.setCursor(13, 123, 4);
-        tft.println("SCORE:" + String(score));
+        tft.drawLine(0, 155, 135, 155, TFT_GREY);
 
-        espDelay(100);
+        int level_record = getLevelRecord();
+        int score_record = getScoreRecord();
+                
+        
+        tft.setTextSize(1);
+        tft.setCursor(13, 160, 2);
+
+        if (level >= level_record && score > score_record) {
+            saveRecord(level, score);
+            tft.setTextColor(TFT_GREEN, TFT_BLACK);
+            tft.println("!! NEW RECORD !!");
+        } else {
+            tft.println("RECORD:");
+        }
+
+        tft.setCursor(13, 185, 2);
+        tft.println("Score: " + String(getScoreRecord()));
+
+        tft.setCursor(13, 200, 2);
+        tft.println("Level: "+ String(getLevelRecord()));
+        
+        espDelay(300);
 
         fase++;
     }
