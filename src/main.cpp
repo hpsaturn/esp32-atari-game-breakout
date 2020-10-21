@@ -61,8 +61,8 @@ void suspend() {
     int r = digitalRead(TFT_BL);
     tft.fillScreen(TFT_BLACK);
     tft.setTextColor(TFT_GREEN, TFT_BLACK);
-    tft.setTextSize(1);
     tft.setTextDatum(MC_DATUM);
+    tft.setTextSize(0);
     tft.drawString("Press again to wake up", tft.width() / 2, tft.height() / 2);
     espDelay(3000);
     digitalWrite(TFT_BL, !r);
@@ -82,7 +82,6 @@ void setup(void) {
     pinMode(35, INPUT);
     tft.init();
     tft.setRotation(0);
-
     tft.setSwapBytes(true);
     tft.pushImage(0, 0, 135, 240, bootlogo);
 }
@@ -209,6 +208,6 @@ void loop() {
         tft.setCursor(13, 123, 4);
         tft.println("SCORE:" + String(score));
 
-        delay(3000);
-    }
+        fase++;
+   }
 }
