@@ -242,7 +242,7 @@ void loop() {
                 
         
         tft.setTextSize(1);
-        tft.setCursor(13, 160, 2);
+        tft.setCursor(13, 164, 2);
 
         if (level >= level_record && score > score_record) {
             saveRecord(level, score);

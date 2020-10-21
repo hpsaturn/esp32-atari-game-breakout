@@ -9,6 +9,7 @@ Migration of `Volos Projects` [Danko Bertović](https://www.youtube.com/c/VolosP
 - [x] Auto suspend for save battery
 - [x] Restart the game with right button also with reset botton
 - [x] ESP light sleep for delay implementation for save battery
+- [x] Save top record in ESP32 flash via Preferences library
 
 # Compiling
 
