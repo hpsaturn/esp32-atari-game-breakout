@@ -1,6 +1,7 @@
 
 #include <SPI.h>
-#include <TFT_eSPI.h>       // Hardware-specific library
+#include <TFT_eSPI.h>  // Hardware-specific library
+
 #include "bmp.h"
 
 #define TFT_GREY 0x5AEB
@@ -33,11 +34,7 @@ int gameSpeed = 7000;
 
 uint32_t suspendCount = 0;
 
-void newLevel() {
-    score = score + 1;
-    delay(3000);
-    gameSpeed = gameSpeed - 500;
-    level = level + 1;
+void resetVars() {
     tft.setCursor(99, 0, 2);
     tft.println("LVL" + String(level));
     y = 75;
@@ -48,6 +45,14 @@ void newLevel() {
     for (int n = 0; n < 16; n++) {
         enx[n] = enx2[n];
     }
+}
+
+void newLevel() {
+    score = score + 1;
+    delay(3000);
+    gameSpeed = gameSpeed - 500;
+    level = level + 1;
+    resetVars();
 }
 
 void espDelay(int ms) {
@@ -208,17 +213,19 @@ void loop() {
         tft.setCursor(13, 123, 4);
         tft.println("SCORE:" + String(score));
 
-        espDelay(1000);
+        espDelay(100);
 
         fase++;
-   }
+    }
 
-   // reset the game with right button
-   if (fase == 3 && digitalRead(35) == 0) {
-     score = 0;
-     level = 1;
-     x = random(30, 100);  //coordinates of ball
-     y = 70;
-     fase = 0;
-   }
+    // reset the game with right button
+    if (fase == 3 && digitalRead(35) == 0) {
+        suspendCount = 0;
+        score = 0;
+        level = 1;
+        fase = 0;
+        pom = 0;
+        gameSpeed = 7000;
+        resetVars();
+    }
 }
