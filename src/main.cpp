@@ -32,6 +32,8 @@ int spe = 0;
 int pom = 0;
 int gameSpeed = 7000;
 
+uint32_t suspendCount = 0;
+
 void newLevel() {
     score = score + 1;
     delay(3000);
@@ -49,6 +51,33 @@ void newLevel() {
     }
 }
 
+void espDelay(int ms) {
+    esp_sleep_enable_timer_wakeup(ms * 1000);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+    esp_light_sleep_start();
+}
+
+void suspend() {
+    suspendCount = 0;
+    int r = digitalRead(TFT_BL);
+    tft.fillScreen(TFT_BLACK);
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.setTextSize(1);
+    tft.setTextDatum(MC_DATUM);
+    tft.drawString("Press again to wake up", tft.width() / 2, tft.height() / 2);
+    espDelay(3000);
+    digitalWrite(TFT_BL, !r);
+
+    tft.writecommand(TFT_DISPOFF);
+    tft.writecommand(TFT_SLPIN);
+    //After using light sleep, you need to disable timer wake, because here use external IO port to wake up
+    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+    // esp_sleep_enable_ext1_wakeup(GPIO_SEL_35, ESP_EXT1_WAKEUP_ALL_LOW);
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_35, 0);
+    delay(200);
+    esp_deep_sleep_start();
+}
+
 void setup(void) {
     pinMode(0, INPUT);
     pinMode(35, INPUT);
@@ -60,6 +89,7 @@ void setup(void) {
 }
 
 void loop() {
+    if (suspendCount++ > 10000000) suspend();  //auto suspend after ~10 sec.
     if (fase == 0) {
         if (digitalRead(0) == 0 || digitalRead(35) == 0) {
             if (pom == 0) {
@@ -183,4 +213,3 @@ void loop() {
         delay(3000);
     }
 }
-
