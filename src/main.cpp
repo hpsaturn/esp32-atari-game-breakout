@@ -56,17 +56,19 @@ void espDelay(int ms) {
     esp_light_sleep_start();
 }
 
+void showSplash() {
+    tft.setRotation(0);
+    tft.setSwapBytes(true);
+    tft.pushImage(0, 0, 135, 240, bootlogo);
+}
+
 void suspend() {
     suspendCount = 0;
+    showSplash();
+    espDelay(2000);
     int r = digitalRead(TFT_BL);
-    tft.fillScreen(TFT_BLACK);
-    tft.setTextColor(TFT_GREEN, TFT_BLACK);
-    tft.setTextDatum(MC_DATUM);
-    tft.setTextSize(0);
-    tft.drawString("Press again to wake up", tft.width() / 2, tft.height() / 2);
-    espDelay(3000);
     digitalWrite(TFT_BL, !r);
-
+    espDelay(2000);
     tft.writecommand(TFT_DISPOFF);
     tft.writecommand(TFT_SLPIN);
     //After using light sleep, you need to disable timer wake, because here use external IO port to wake up
@@ -80,10 +82,8 @@ void suspend() {
 void setup(void) {
     pinMode(0, INPUT);
     pinMode(35, INPUT);
-    tft.init();
-    tft.setRotation(0);
-    tft.setSwapBytes(true);
-    tft.pushImage(0, 0, 135, 240, bootlogo);
+    tft.begin();
+    showSplash();
 }
 
 void loop() {
@@ -208,6 +208,17 @@ void loop() {
         tft.setCursor(13, 123, 4);
         tft.println("SCORE:" + String(score));
 
+        espDelay(2000);
+
         fase++;
+   }
+
+   // reset the game with right button
+   if (fase == 3 && digitalRead(35) == 0) {
+     score = 0;
+     level = 1;
+     x = random(30, 100);  //coordinates of ball
+     y = 70;
+     fase = 0;
    }
 }
