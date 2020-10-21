@@ -1,4 +1,4 @@
-# Esp32 Atari game Breakout
+# Esp32 Atari Breakout game 
 
 Migration of `Volos Projects` [Danko Bertović](https://www.youtube.com/c/VolosProjects/featured) game from Arduino IDE to PlatformIO but it is compatible with Arduino too.
 
@@ -11,3 +11,7 @@ For compiling and installing, please install first [PlatformIO](http://platformi
 ``` bash
 pio run --target upload
 ```
+
+# Credits
+
+Original source code was posted on [Volos projects](https://www.youtube.com/c/VolosProjects/featured) channel.
