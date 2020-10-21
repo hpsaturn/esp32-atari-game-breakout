@@ -208,7 +208,7 @@ void loop() {
         tft.setCursor(13, 123, 4);
         tft.println("SCORE:" + String(score));
 
-        espDelay(2000);
+        espDelay(1000);
 
         fase++;
    }
