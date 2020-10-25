@@ -2,8 +2,6 @@
 
 Migration of `Volos Projects` [Danko Bertović](https://www.youtube.com/c/VolosProjects/featured) game from Arduino IDE to PlatformIO but it is compatible with Arduino too.
 
-[![TTGO Display Breakout Atari game](https://img.youtube.com/vi/N6V7ZJkhSbc/0.jpg)](https://www.youtube.com/watch?v=N6V7ZJkhSbc)
-
 ## Mod features added
 
 - [x] Auto suspend for save battery
@@ -20,6 +18,17 @@ For compiling and installing, please install first [PlatformIO](http://platformi
 pio run --target upload
 ```
 
+## 3D print case VIDEO
+
+[![TTGO T-Display game console case](https://img.youtube.com/vi/P4lxfTi-EXg/0.jpg)](https://www.youtube.com/watch?v=P4lxfTi-EXg)
+
+TTGO T-Display game console case on [Youtube](https://www.youtube.com/watch?v=P4lxfTi-EXg)
+
+---
+
 ## Credits
 
 Original source code was posted on [Volos projects](https://www.youtube.com/c/VolosProjects/featured) channel.
+
+[![TTGO Display Breakout Atari game](https://img.youtube.com/vi/N6V7ZJkhSbc/0.jpg)](https://www.youtube.com/watch?v=N6V7ZJkhSbc)
+
