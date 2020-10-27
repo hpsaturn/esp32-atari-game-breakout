@@ -131,17 +131,17 @@ int getScoreRecord() {
 void showBatteryStatus() {
     tft.setTextSize(1);
     float volts = battGetVoltage();
-    String battery = "";
+    String batt = "";
     if (battIsCharging()) {
         tft.setTextColor(TFT_GREEN);
-        battery = "CHAR:" + String(battCalcPercentage(volts)) + "%";
+        batt = "BAT:" + String(battCalcPercentage(volts)) + "%";
     }
     else {
-        int level = battCalcPercentage(volts);
-        if (level < 30) tft.setTextColor(TFT_RED);
-        battery = "BATT:" + String(level) + "%";
+        int batt_value = battCalcPercentage(volts);
+        if (batt_value < 30) tft.setTextColor(TFT_RED);
+        batt = "BAT: " + String(batt_value) + "%";
     } 
-    tft.drawString(battery, 0, 0);
+    tft.drawString(batt, 0, 0);
     tft.setTextColor(TFT_WHITE);
     tft.setTextDatum(TC_DATUM);
     String voltage = "" + String(volts) + "v";
@@ -151,7 +151,6 @@ void showBatteryStatus() {
 
 void showGameOver(){
     tft.fillScreen(TFT_BLACK);
-
 
     tft.setCursor(13, 83, 2);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -189,10 +188,13 @@ void showGameOver(){
 }
 
 void setup(void) {
+    Serial.begin(115200);
+    Serial.println("\n-->[SETUP] init:");
     pinMode(BUTTON_L, INPUT);
     pinMode(BUTTON_R, INPUT);
     tft.begin();
     setupBattery();              // init battery ADC.
+    setupBattADC();
     showSplash();
 }
 
@@ -224,9 +226,9 @@ void loop() {
         // spe=spe+1;
 
         if (px >= 2 && px <= 109) {
-            if (digitalRead(0) == 0)
+            if (digitalRead(BUTTON_L) == 0)
                 px = px - 1;
-            if (digitalRead(35) == 0)
+            if (digitalRead(BUTTON_R) == 0)
                 px = px + 1;
         }
         if (px <= 3)
@@ -289,6 +291,7 @@ void loop() {
     if (fase == 2) {
         showGameOver();
         showBatteryStatus();
+        setupBattADC();
         delay(300);
         fase++;
     }
@@ -303,4 +306,6 @@ void loop() {
         gameSpeed = 7000;
         resetVars();
     }
+
+
 }

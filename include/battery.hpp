@@ -5,7 +5,7 @@
 #define BATTERY_MIN_V 2.9
 #define BATTERY_MAX_V 4.3
 #define BATTCHARG_MIN_V 4.6
-#define BATTCHARG_MAX_V 4.85
+#define BATTCHARG_MAX_V 4.99
 
 void setupBattADC();
 void setupBattery();

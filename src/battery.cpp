@@ -25,7 +25,6 @@ void setupBattery() {
     */
     pinMode(ADC_EN, OUTPUT);
     digitalWrite(ADC_EN, HIGH);
-    setupBattADC();
 }
 
 float battGetVoltage() {
@@ -33,6 +32,7 @@ float battGetVoltage() {
     uint16_t v = analogRead(ADC_PIN);
     curv = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
     digitalWrite(ADC_EN, LOW);   // for possible issue: https://github.com/Xinyuan-LilyGO/TTGO-T-Display/issues/6
+    Serial.printf("-->[BATT] voltage: %f volts\n", curv);
     return curv;
 }
 
