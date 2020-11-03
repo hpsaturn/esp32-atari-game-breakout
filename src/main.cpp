@@ -2,6 +2,8 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>  // Hardware-specific library
 #include <Preferences.h>
+#include <battery.hpp>
+#include <hal.hpp>
 #include "bmp.h"
 
 #define TFT_GREY 0x5AEB
@@ -70,6 +72,24 @@ void showSplash() {
     tft.pushImage(0, 0, 135, 240, bootlogo);
 }
 
+void displayBoard() {
+    tft.fillScreen(TFT_BLACK);
+    tft.drawLine(0, 17, 0, 240, TFT_GREY);
+    tft.drawLine(0, 17, 135, 17, TFT_GREY);
+    tft.drawLine(134, 17, 134, 240, TFT_GREY);
+
+    tft.setCursor(3, 3, 2);
+
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.setTextSize(1);
+
+    tft.setCursor(0, 0, 2);
+    tft.println("SCORE " + String(score));
+
+    tft.setCursor(99, 0, 2);
+    tft.println("LVL" + String(level));
+}
+
 void suspend() {
     suspendCount = 0;
     showSplash();
@@ -108,10 +128,73 @@ int getScoreRecord() {
     return record;
 }
 
+void showBatteryStatus() {
+    tft.setTextSize(1);
+    float volts = battGetVoltage();
+    String batt = "";
+    if (battIsCharging()) {
+        tft.setTextColor(TFT_GREEN);
+        batt = "BAT:" + String(battCalcPercentage(volts)) + "%";
+    }
+    else {
+        int batt_value = battCalcPercentage(volts);
+        if (batt_value < 30) tft.setTextColor(TFT_RED);
+        batt = "BAT: " + String(batt_value) + "%";
+    } 
+    tft.drawString(batt, 0, 0);
+    tft.setTextColor(TFT_WHITE);
+    tft.setTextDatum(TC_DATUM);
+    String voltage = "" + String(volts) + "v";
+    tft.setTextDatum(TR_DATUM);
+    tft.drawString(voltage, tft.width(), 0);
+}
+
+void showGameOver(){
+    tft.fillScreen(TFT_BLACK);
+
+    tft.setCursor(13, 83, 2);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.setTextSize(1);
+
+    tft.println("GAME OVER");
+
+    tft.setCursor(13, 103, 4);
+    tft.println("SCORE:" + String(score));
+
+    tft.setCursor(13, 130, 4);
+    tft.println("LEVEL:" + String(level));
+
+    tft.drawLine(0, 155, 135, 155, TFT_GREY);
+
+    int level_record = getLevelRecord();
+    int score_record = getScoreRecord();
+
+    tft.setTextSize(1);
+    tft.setCursor(13, 164, 2);
+
+    if (level >= level_record && score > score_record) {
+        saveRecord(level, score);
+        tft.setTextColor(TFT_GREEN, TFT_BLACK);
+        tft.println("!! NEW RECORD !!");
+    } else {
+        tft.println("RECORD:");
+    }
+
+    tft.setCursor(13, 185, 2);
+    tft.println("Score: " + String(getScoreRecord()));
+
+    tft.setCursor(13, 200, 2);
+    tft.println("Level: " + String(getLevelRecord()));
+}
+
 void setup(void) {
-    pinMode(0, INPUT);
-    pinMode(35, INPUT);
+    Serial.begin(115200);
+    Serial.println("\n-->[SETUP] init:");
+    pinMode(BUTTON_L, INPUT);
+    pinMode(BUTTON_R, INPUT);
     tft.begin();
+    setupBattery();              // init battery ADC.
+    setupBattADC();
     showSplash();
 }
 
@@ -120,25 +203,10 @@ void loop() {
     if (fase == 0) {
         if (digitalRead(0) == 0 || digitalRead(35) == 0) {
             if (pom == 0) {
-                tft.fillScreen(TFT_BLACK);
-                tft.drawLine(0, 17, 0, 240, TFT_GREY);
-                tft.drawLine(0, 17, 135, 17, TFT_GREY);
-                tft.drawLine(134, 17, 134, 240, TFT_GREY);
-
-                tft.setCursor(3, 3, 2);
-
-                tft.setTextColor(TFT_WHITE, TFT_BLACK);
-                tft.setTextSize(1);
-
-                tft.setCursor(0, 0, 2);
-                tft.println("SCORE " + String(score));
-
-                tft.setCursor(99, 0, 2);
-                tft.println("LVL" + String(level));
+                displayBoard();
                 fase = fase + 1;
                 pom = 1;
             }
-
         } else {
             pom = 0;
         }
@@ -158,9 +226,9 @@ void loop() {
         // spe=spe+1;
 
         if (px >= 2 && px <= 109) {
-            if (digitalRead(0) == 0)
+            if (digitalRead(BUTTON_L) == 0)
                 px = px - 1;
-            if (digitalRead(35) == 0)
+            if (digitalRead(BUTTON_R) == 0)
                 px = px + 1;
         }
         if (px <= 3)
@@ -221,50 +289,15 @@ void loop() {
         delayMicroseconds(gameSpeed);
     }
     if (fase == 2) {
-        tft.fillScreen(TFT_BLACK);
-
-        tft.setCursor(13, 83, 2);
-        tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        tft.setTextSize(1);
-
-        tft.println("GAME OVER");
-
-        tft.setCursor(13, 103, 4);
-        tft.println("SCORE:" + String(score));
-
-        tft.setCursor(13, 130, 4);
-        tft.println("LEVEL:"+ String(level));
-
-        tft.drawLine(0, 155, 135, 155, TFT_GREY);
-
-        int level_record = getLevelRecord();
-        int score_record = getScoreRecord();
-                
-        
-        tft.setTextSize(1);
-        tft.setCursor(13, 164, 2);
-
-        if (level >= level_record && score > score_record) {
-            saveRecord(level, score);
-            tft.setTextColor(TFT_GREEN, TFT_BLACK);
-            tft.println("!! NEW RECORD !!");
-        } else {
-            tft.println("RECORD:");
-        }
-
-        tft.setCursor(13, 185, 2);
-        tft.println("Score: " + String(getScoreRecord()));
-
-        tft.setCursor(13, 200, 2);
-        tft.println("Level: "+ String(getLevelRecord()));
-        
-        espDelay(300);
-
+        showGameOver();
+        showBatteryStatus();
+        setupBattADC();
+        delay(300);
         fase++;
     }
 
     // reset the game with right button
-    if (fase == 3 && digitalRead(35) == 0) {
+    if (fase == 3 && digitalRead(BUTTON_R) == 0) {
         suspendCount = 0;
         score = 0;
         level = 1;
@@ -273,4 +306,6 @@ void loop() {
         gameSpeed = 7000;
         resetVars();
     }
+
+
 }
