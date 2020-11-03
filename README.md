@@ -8,7 +8,8 @@ Migration of `Volos Projects` [Danko Bertović](https://www.youtube.com/c/VolosP
 - [x] Restart the game with right button also with reset botton
 - [x] ESP light sleep for delay implementation for save battery
 - [x] Saved top record in ESP32 flash via Preferences library
-- [ ] Show battery level
+- [x] Show battery level (only in the first game over screen)
+- [ ] Battery level issue (refresh fails sometimes)
 
 ## Compiling
 
