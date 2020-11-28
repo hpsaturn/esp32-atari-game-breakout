@@ -24,6 +24,7 @@ void setupBattery() {
     If it is powered by battery, it needs to be set to high level
     */
     pinMode(ADC_EN, OUTPUT);
+    delay(10);    // suggested by @ygator user in issue #2
     digitalWrite(ADC_EN, HIGH);
 }
 
