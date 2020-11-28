@@ -190,8 +190,8 @@ void showGameOver(){
 void setup(void) {
     Serial.begin(115200);
     Serial.println("\n-->[SETUP] init:");
-    pinMode(BUTTON_L, INPUT);
-    pinMode(BUTTON_R, INPUT);
+    pinMode(BUTTON_L, INPUT_PULLUP);
+    pinMode(BUTTON_R, INPUT_PULLUP);
     tft.begin();
     setupBattery();              // init battery ADC.
     setupBattADC();
