@@ -141,6 +141,7 @@ void showBatteryStatus() {
         if (batt_value < 30) tft.setTextColor(TFT_RED);
         batt = "BAT: " + String(batt_value) + "%";
     } 
+    tft.setTextDatum(TL_DATUM);
     tft.drawString(batt, 0, 0);
     tft.setTextColor(TFT_WHITE);
     tft.setTextDatum(TC_DATUM);
