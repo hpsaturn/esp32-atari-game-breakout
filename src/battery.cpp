@@ -24,13 +24,13 @@ void setupBattery() {
     If it is powered by battery, it needs to be set to high level
     */
     pinMode(ADC_EN, OUTPUT);
-    delay(10);    // suggested by @ygator user in issue #2
     digitalWrite(ADC_EN, HIGH);
 }
 
 float battGetVoltage() {
     digitalWrite(ADC_EN, HIGH);
-    uint16_t v = analogRead(ADC_PIN);
+    delay(10);                         // suggested by @ygator user in issue #2
+    uint16_t v = analogRead(ADC_PIN);  
     curv = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
     digitalWrite(ADC_EN, LOW);   // for possible issue: https://github.com/Xinyuan-LilyGO/TTGO-T-Display/issues/6
     Serial.printf("-->[BATT] voltage: %f volts\n", curv);
