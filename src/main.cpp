@@ -1,9 +1,9 @@
-
+#include <EspNowJoystick.hpp>
 #include <SPI.h>
-#include <TFT_eSPI.h>  // Hardware-specific library
+#include <TFT_eSPI.h>
 #include <Preferences.h>
-#include <battery.hpp>
-#include <hal.hpp>
+#include "battery.hpp"
+#include "hal.hpp"
 #include "bmp.h"
 
 #define TFT_GREY 0x5AEB
@@ -12,6 +12,9 @@
 #define purple 0xFB9B
 
 TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
+
+EspNowJoystick joystick;
+TelemetryMessage tm;
 
 float ys = 1;
 float x = random(30, 100);  //coordinates of ball
@@ -38,6 +41,29 @@ uint32_t suspendCount = 0;
 
 Preferences preferences;
 const char * app_name = "breakout";
+
+void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
+    Wt = (Wt > 100) ? 100 : Wt;
+    Wt = (Wt < -100) ? -100 : Wt;
+    Vty = (Vty > 100) ? 100 : Vty;
+    Vty = (Vty < -100) ? -100 : Vty;
+
+    int turn = map(abs(Wt), 0, 100, 0, 5);
+    
+    // Serial.printf("[Vtx:%04d Vty:%04d Wt:%04d ]\n",Vtx, Vty, Wt);
+    // Serial.println(debugCount++);
+
+    int dir = (Wt>0) ? 0 : 1; // 0 left, 1 right
+
+    if (turn > 0) {
+        if (dir == 0) {  // turn left
+            px = px - turn;
+        } else {  // turn right
+            px = px + turn;
+        }
+    }
+
+}
 
 void resetVars() {
     tft.setCursor(99, 0, 2);
@@ -91,12 +117,15 @@ void displayBoard() {
 }
 
 void suspend() {
+    tm.e1 = false;   // notify to joystick that we are sleeping
+    joystick.sendTelemetryMsg(tm);
+
     suspendCount = 0;
     showSplash();
-    espDelay(2000);
+    espDelay(3000);
     int r = digitalRead(TFT_BL);
     digitalWrite(TFT_BL, !r);
-    espDelay(2000);
+    espDelay(1000);
     tft.writecommand(TFT_DISPOFF);
     tft.writecommand(TFT_SLPIN);
     //After using light sleep, you need to disable timer wake, because here use external IO port to wake up
@@ -188,9 +217,39 @@ void showGameOver(){
     tft.println("Level: " + String(getLevelRecord()));
 }
 
+void sendHeartbeat() {
+    static uint_least32_t timeStamp = 0;
+    if (millis() - timeStamp > 500) {
+        timeStamp = millis();
+        tm.btv = battGetVoltage();
+        tm.btl = battCalcPercentage(tm.btv);
+        tm.e1 = true;
+        joystick.sendTelemetryMsg(tm);
+    }
+}
+
+class MyJoystickCallback : public EspNowJoystickCallbacks {
+    void onJoystickMsg(JoystickMessage jm){
+        if (jm.ck == 0x01) {
+            setSpeed(jm.ax - 100, jm.ay - 100, jm.az - 100);
+        } else {
+            setSpeed(0, 0, 0);
+        }
+    };
+    void onError(){
+        setSpeed(0, 0, 0);
+        Serial.println("Error");
+    };
+};
+
 void setup(void) {
     Serial.begin(115200);
     Serial.println("\n-->[SETUP] init:");
+    Serial.begin(115200);
+    delay(100);
+    joystick.setJoystickCallbacks(new MyJoystickCallback());
+    tm = joystick.newTelemetryMsg();
+    joystick.init();
     pinMode(BUTTON_L, INPUT_PULLUP);
     pinMode(BUTTON_R, INPUT_PULLUP);
     tft.begin();
@@ -200,9 +259,10 @@ void setup(void) {
 }
 
 void loop() {
-    if (suspendCount++ > 10000000) suspend();  //auto suspend after ~10 sec.
+    if (suspendCount++ > 10000000) suspend();  //auto suspend after ~1 minute
+    sendHeartbeat();
     if (fase == 0) {
-        if (digitalRead(0) == 0 || digitalRead(35) == 0) {
+        if (digitalRead(0) == 0 || digitalRead(35) == 0 || px != 45) {
             if (pom == 0) {
                 displayBoard();
                 fase = fase + 1;
@@ -290,15 +350,18 @@ void loop() {
         delayMicroseconds(gameSpeed);
     }
     if (fase == 2) {
+        px = 45;
+        tm.e1 = 1;
+        joystick.sendTelemetryMsg(tm);
         showGameOver();
         showBatteryStatus();
         setupBattADC();
-        delay(300);
+        delay(500);
         fase++;
     }
 
     // reset the game with right button
-    if (fase == 3 && digitalRead(BUTTON_R) == 0) {
+    if (fase == 3 && (digitalRead(BUTTON_R) == 0 || px != 45)) {
         suspendCount = 0;
         score = 0;
         level = 1;
@@ -307,6 +370,4 @@ void loop() {
         gameSpeed = 7000;
         resetVars();
     }
-
-
 }
