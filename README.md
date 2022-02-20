@@ -10,6 +10,9 @@ Migration of `Volos Projects` [Danko Bertović](https://www.youtube.com/c/VolosP
 - [x] Saved top record in ESP32 flash via Preferences library
 - [x] Show battery level (only in the first game over screen)
 - [x] Battery level issue (Thanks @ygator) 
+- [x] Added support for [ESPNow Joystick](https://www.youtube.com/watch?v=pZbMmkq8tUw)  
+
+[![screenshot20220215_010838small](https://user-images.githubusercontent.com/423856/154026452-cd96ca60-f828-4463-8909-a6da1e114667.jpg)](https://www.youtube.com/watch?v=pZbMmkq8tUw)
 
 ## Compiling
 
