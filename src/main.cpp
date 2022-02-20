@@ -236,7 +236,7 @@ class MyJoystickCallback : public EspNowJoystickCallbacks {
             setSpeed(0, 0, 0);
         }
     };
-    void onError(){
+    void onError(const char *msg){
         setSpeed(0, 0, 0);
         Serial.println("Error");
     };
